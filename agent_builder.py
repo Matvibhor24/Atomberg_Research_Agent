@@ -1,1 +1,145 @@
-from langgraph.graph import StateGraph, ENDfrom typing import TypedDict, List, Dict, Anyclass AgentState(TypedDict):    keywords: List[str]    brands: List[str]    raw_data: List[Dict[str, Any]]    clean_data: List[Dict[str, Any]]    mentions: Dict[str, int]    engagement: Dict[str, Dict[str, int]]    sentiments: Dict[str, Dict[str, int]]    metrics: Dict[str, Any]    insights: strdef keyword_setup(state: AgentState) -> AgentState:    brands = ["Atomberg", "Crompton", "Havells", "Orient", "Bajaj", "Polycab", "Usha"]    return {        **state,        "brands": brands,        "mentions": {b: 0 for b in brands},        "engagement": {b: {"likes": 0, "comments": 0, "shares": 0, "views": 0} for b in brands},        "sentiments": {b: {"positive": 0, "negative": 0, "neutral": 0} for b in brands},    }def data_retrieval(state: AgentState) -> AgentState:    dummy_posts = [        {"platform": "YouTube", "text": "Atomberg smart fan review - amazing!", "meta": {"likes": 120, "comments": 15, "views": 5000}},        {"platform": "X", "text": "Orient smart fan is overpriced compared to Atomberg", "meta": {"likes": 80, "comments": 20, "shares": 10}},    ]    state["raw_data"] = dummy_posts    return statedef noise_filtering(state: AgentState) -> AgentState:    keywords = state["keywords"]    clean = [        p for p in state["raw_data"]        if any(kw.lower() in p["text"].lower() for kw in keywords)    ]    state["clean_data"] = clean    return statedef brand_tagging(state: AgentState) -> AgentState:    for post in state["clean_data"]:        for brand in state["brands"]:            if brand.lower() in post["text"].lower():                state["mentions"][brand] += 1                post["brand"] = brand    return statedef engagement_aggregation(state: AgentState) -> AgentState:    for post in state["clean_data"]:        if "brand" in post:            b = post["brand"]            meta = post["meta"]            for key in state["engagement"][b]:                state["engagement"][b][key] += meta.get(key, 0)    return statedef sentiment_analysis(state: AgentState) -> AgentState:    for post in state["clean_data"]:        if "brand" not in post:            continue        b = post["brand"]        text = post["text"].lower()        if "amazing" in text or "best" in text:            state["sentiments"][b]["positive"] += 1        elif "overpriced" in text or "bad" in text:            state["sentiments"][b]["negative"] += 1        else:            state["sentiments"][b]["neutral"] += 1    return statedef metric_computation(state: AgentState) -> AgentState:    total_mentions = sum(state["mentions"].values()) or 1    total_pos = sum(s["positive"] for s in state["sentiments"].values()) or 1    sov = {b: 100 * c / total_mentions for b, c in state["mentions"].items()}    pos_sov = {b: 100 * s["positive"] / total_pos for b, s in state["sentiments"].items()}    state["metrics"] = {"sov": sov, "positive_sov": pos_sov}    return statedef insight_generation(state: AgentState) -> AgentState:    state["insights"] = f"""    Atomberg SOV: {state['metrics']['sov'].get('Atomberg', 0):.2f}%    Positive SOV: {state['metrics']['positive_sov'].get('Atomberg', 0):.2f}%    Key Insight: Atomberg has strong positive buzz, while Orient faces negative price sentiment.    """    return stateworkflow = StateGraph(AgentState)workflow.add_node("keyword_setup", keyword_setup)workflow.add_node("data_retrieval", data_retrieval)workflow.add_node("noise_filtering", noise_filtering)workflow.add_node("brand_tagging", brand_tagging)workflow.add_node("engagement_aggregation", engagement_aggregation)workflow.add_node("sentiment_analysis", sentiment_analysis)workflow.add_node("metric_computation", metric_computation)workflow.add_node("insight_generation", insight_generation)workflow.set_entry_point("keyword_setup")workflow.add_edge("keyword_setup", "data_retrieval")workflow.add_edge("data_retrieval", "noise_filtering")workflow.add_edge("noise_filtering", "brand_tagging")workflow.add_edge("brand_tagging", "engagement_aggregation")workflow.add_edge("engagement_aggregation", "sentiment_analysis")workflow.add_edge("sentiment_analysis", "metric_computation")workflow.add_edge("metric_computation", "insight_generation")workflow.add_edge("insight_generation", END)graph = workflow.compile()if __name__ == "__main__":    initial_state = {"keywords": ["smart fan"]}    final_state = graph.invoke(initial_state)    print("Final Metrics:", final_state["metrics"])    print("Insights:", final_state["insights"])
+from langgraph.graph import StateGraph, END
+from typing import TypedDict, List, Dict, Any
+
+
+class AgentState(TypedDict):
+    keywords: List[str]
+    brands: List[str]
+    raw_data: List[Dict[str, Any]]
+    clean_data: List[Dict[str, Any]]
+    mentions: Dict[str, int]
+    engagement: Dict[str, Dict[str, int]]
+    sentiments: Dict[str, Dict[str, int]]
+    metrics: Dict[str, Any]
+    insights: str
+
+
+def keyword_setup(state: AgentState) -> AgentState:
+    brands = ["Atomberg", "Crompton", "Havells", "Orient", "Bajaj", "Polycab", "Usha"]
+    return {
+        **state,
+        "brands": brands,
+        "mentions": {b: 0 for b in brands},
+        "engagement": {
+            b: {"likes": 0, "comments": 0, "shares": 0, "views": 0} for b in brands
+        },
+        "sentiments": {b: {"positive": 0, "negative": 0, "neutral": 0} for b in brands},
+    }
+
+
+def data_retrieval(state: AgentState) -> AgentState:
+    dummy_posts = [
+        {
+            "platform": "YouTube",
+            "text": "Atomberg smart fan review - amazing!",
+            "meta": {"likes": 120, "comments": 15, "views": 5000},
+        },
+        {
+            "platform": "X",
+            "text": "Orient smart fan is overpriced compared to Atomberg",
+            "meta": {"likes": 80, "comments": 20, "shares": 10},
+        },
+    ]
+    state["raw_data"] = dummy_posts
+    return state
+
+
+def noise_filtering(state: AgentState) -> AgentState:
+    keywords = state["keywords"]
+    clean = [
+        p
+        for p in state["raw_data"]
+        if any(kw.lower() in p["text"].lower() for kw in keywords)
+    ]
+    state["clean_data"] = clean
+    return state
+
+
+def brand_tagging(state: AgentState) -> AgentState:
+    for post in state["clean_data"]:
+        for brand in state["brands"]:
+            if brand.lower() in post["text"].lower():
+                state["mentions"][brand] += 1
+                post["brand"] = brand
+    return state
+
+
+def engagement_aggregation(state: AgentState) -> AgentState:
+    for post in state["clean_data"]:
+        if "brand" in post:
+            b = post["brand"]
+            meta = post["meta"]
+            for key in state["engagement"][b]:
+                state["engagement"][b][key] += meta.get(key, 0)
+    return state
+
+
+def sentiment_analysis(state: AgentState) -> AgentState:
+    for post in state["clean_data"]:
+        if "brand" not in post:
+            continue
+        b = post["brand"]
+        text = post["text"].lower()
+        if "amazing" in text or "best" in text:
+            state["sentiments"][b]["positive"] += 1
+        elif "overpriced" in text or "bad" in text:
+            state["sentiments"][b]["negative"] += 1
+        else:
+            state["sentiments"][b]["neutral"] += 1
+    return state
+
+
+def metric_computation(state: AgentState) -> AgentState:
+    total_mentions = sum(state["mentions"].values()) or 1
+    total_pos = sum(s["positive"] for s in state["sentiments"].values()) or 1
+
+    sov = {b: 100 * c / total_mentions for b, c in state["mentions"].items()}
+    pos_sov = {
+        b: 100 * s["positive"] / total_pos for b, s in state["sentiments"].items()
+    }
+
+    state["metrics"] = {"sov": sov, "positive_sov": pos_sov}
+    return state
+
+
+def insight_generation(state: AgentState) -> AgentState:
+    state[
+        "insights"
+    ] = f"""
+    Atomberg SOV: {state['metrics']['sov'].get('Atomberg', 0):.2f}%
+    Positive SOV: {state['metrics']['positive_sov'].get('Atomberg', 0):.2f}%
+    Key Insight: Atomberg has strong positive buzz, while Orient faces negative price sentiment.
+    """
+    return state
+
+
+workflow = StateGraph(AgentState)
+
+workflow.add_node("keyword_setup", keyword_setup)
+workflow.add_node("data_retrieval", data_retrieval)
+workflow.add_node("noise_filtering", noise_filtering)
+workflow.add_node("brand_tagging", brand_tagging)
+workflow.add_node("engagement_aggregation", engagement_aggregation)
+workflow.add_node("sentiment_analysis", sentiment_analysis)
+workflow.add_node("metric_computation", metric_computation)
+workflow.add_node("insight_generation", insight_generation)
+
+workflow.set_entry_point("keyword_setup")
+
+workflow.add_edge("keyword_setup", "data_retrieval")
+workflow.add_edge("data_retrieval", "noise_filtering")
+workflow.add_edge("noise_filtering", "brand_tagging")
+workflow.add_edge("brand_tagging", "engagement_aggregation")
+workflow.add_edge("engagement_aggregation", "sentiment_analysis")
+workflow.add_edge("sentiment_analysis", "metric_computation")
+workflow.add_edge("metric_computation", "insight_generation")
+workflow.add_edge("insight_generation", END)
+
+graph = workflow.compile()
+
+
+if __name__ == "__main__":
+    initial_state = {"keywords": ["smart fan"]}
+    final_state = graph.invoke(initial_state)
+    print("Final Metrics:", final_state["metrics"])
+    print("Insights:", final_state["insights"])
