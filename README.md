@@ -24,8 +24,7 @@ Built with **Python**, **LangGraph nodes**, **VADER sentiment analysis**, and **
 - **YouTube Data API v3** – Fetch YouTube posts  
 - **VADER (NLTK)** – Sentiment analysis  
 - **LangGraph** – AI agent orchestration  
-- **Matplotlib / Seaborn** – Visualization (optional)  
-- **LangChain / LLMs** – Optional narrative insight generation  
+- **LangChain / LLMs** – narrative insight generation  
 
 ---
 
@@ -41,8 +40,69 @@ Built with **Python**, **LangGraph nodes**, **VADER sentiment analysis**, and **
 
 ---
 
+---
+
 ## Setup Instructions
-1. Clone the repository:  
-```bash
+
+### 1. Clone the Repository
 git clone <repo_url>
 cd atomberg-sov-agent
+
+text
+
+### 2. Create a Virtual Environment (Recommended)
+python -m venv venv
+source venv/bin/activate # Linux/macOS
+venv\Scripts\activate # Windows
+
+text
+
+### 3. Install Dependencies
+pip install -r requirements.txt
+
+text
+
+### 4. Configure API Keys
+The agent requires API keys for Google Search and YouTube. X scraping uses **snscrape**, which does not require keys.  
+
+- **Google Search / SerpAPI** → Obtain an API key from SerpAPI or Google Custom Search.  
+- **YouTube Data API v3** → Enable the API in Google Cloud Console and generate your key.  
+- **X (Twitter)** → Works via `snscrape`, no keys needed.  
+- **Optional: OpenAI** → For narrative summaries, get an OpenAI API key.  
+
+Create a `.env` file in the project root and add your credentials:
+GOOGLE_API_KEY=your_google_api_key
+YOUTUBE_API_KEY=your_youtube_api_key
+OPENAI_API_KEY=your_openai_api_key # Optional
+
+text
+
+### 5. Verify Setup
+python main.py --test
+
+text
+This will fetch dummy posts and confirm connectivity.
+
+### 6. Run the Agent
+python main.py
+
+text
+
+The agent will:
+- Retrieve data from Google, YouTube, and X
+- Clean and deduplicate content
+- Tag brand mentions and calculate engagement metrics
+- Perform sentiment analysis
+- Compute SoV and related KPIs
+- Output results and insights
+
+**Outputs include JSON files, text summaries, and optional graphs.**
+
+---
+
+## Example Outputs
+- `outputs/results.json` → Processed raw + structured data  
+- `outputs/insights.txt` → Narrative insights (if OpenAI integrated)  
+- `outputs/charts/` → Engagement trend graphs, SoV breakdown  
+
+---
