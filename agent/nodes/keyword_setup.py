@@ -2,7 +2,7 @@ from typing import Dict, Any
 from langsmith import traceable
 
 
-@traceable(run_type="tool", name="keyword_setup")
+@traceable(run_type="chain", name="keyword_setup")
 def keyword_setup_node(state: Dict[str, Any]) -> Dict[str, Any]:
     """
     Node 1: Initialize brands, mentions, engagement, and sentiment counters.

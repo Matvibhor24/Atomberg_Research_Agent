@@ -16,19 +16,15 @@ def data_retrieval_node(state: Dict[str, Any]) -> Dict[str, Any]:
 
     combined = []
 
-    serpapi_key = os.getenv("SERPAPI_KEY") or state.get("SERPAPI_KEY")
-    if serpapi_key:
-        try:
-            combined.extend(fetch_google_serpapi(keyword, serpapi_key, top_n=top_n))
-        except Exception as e:
-            print("Google fetch error:", e)
+    try:
+        combined.extend(fetch_google_serpapi(keyword, top_n=top_n))
+    except Exception as e:
+        print("Google fetch error:", e)
 
-    yt_key = os.getenv("YOUTUBE_API_KEY") or state.get("YOUTUBE_API_KEY")
-    if yt_key:
-        try:
-            combined.extend(fetch_youtube(keyword, yt_key, top_n_videos=top_n))
-        except Exception as e:
-            print("YouTube fetch error:", e)
+    try:
+        combined.extend(fetch_youtube(keyword, top_n_videos=top_n))
+    except Exception as e:
+        print("YouTube fetch error:", e)
 
     enable_x = str(os.getenv("ENABLE_X") or state.get("ENABLE_X", "")).lower() in (
         "1",

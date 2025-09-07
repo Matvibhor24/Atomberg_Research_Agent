@@ -36,16 +36,34 @@ def _rule_based_insights(metrics: Dict[str, Any]) -> Dict[str, str]:
     return insights
 
 
-@traceable(run_type="tool", name="insight_generation")
+def _call_gemini(summary_prompt: str, api_key: str) -> str:
+    llm = ChatGoogleGenerativeAI(
+        model="gemini-2.5-flash",
+        temperature=0.4,
+        max_output_tokens=250,
+        google_api_key=api_key,
+    )
+    return (llm.invoke(summary_prompt).content or "").strip()
+
+
+@traceable(run_type="chain", name="insight_generation")
 def insight_generation_node(state: Dict[str, Any]) -> Dict[str, Any]:
     metrics = state.get("metrics", {})
-    rule_based = _rule_based_insights(metrics)
-
-    narrative = (
-        f"Based on the data, {rule_based['sov']} "
-        f"Additionally, {rule_based['spv']} "
-        f"Finally, {rule_based['engagement']}"
-    )
+    try:
+        if not metrics:
+            raise ValueError("No metrics available")
+        rule_based = _rule_based_insights(metrics)
+        narrative = (
+            f"Based on the data, {rule_based['sov']} "
+            f"Additionally, {rule_based['spv']} "
+            f"Finally, {rule_based['engagement']}"
+        )
+    except Exception:
+        rule_based = {}
+        narrative = (
+            "Not enough data to compute comparative brand insights yet. "
+            "Please try with broader keywords or a longer time window."
+        )
 
     # Prefer Google Gemini (via GOOGLE_API_KEY) for generating narrative
     gemini_key = os.getenv("GOOGLE_API_KEY") or state.get("GOOGLE_API_KEY")
@@ -57,16 +75,13 @@ def insight_generation_node(state: Dict[str, Any]) -> Dict[str, Any]:
                 f"Metrics JSON:\n{metrics}\n\n"
                 f"Rule-based insights:\n{rule_based}\n\n"
             )
-            llm = ChatGoogleGenerativeAI(
-                model="gemini-2.5-flash",
-                temperature=0.4,
-                max_output_tokens=250,
-                google_api_key=gemini_key,
-            )
-            llm_text = llm.invoke(summary_prompt).content.strip()
+            llm_text = _call_gemini(summary_prompt, gemini_key)
         except Exception:
             llm_text = narrative
     else:
+        llm_text = narrative
+
+    if not llm_text:
         llm_text = narrative
 
     # OpenAI-based summarization is temporarily disabled in favor of Gemini.

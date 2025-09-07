@@ -19,7 +19,7 @@ from agent.nodes.insight_generation import insight_generation_node
 def build_graph():
     """
     Construct the LangGraph workflow using modular node implementations.
-    Returns a compiled graph ready to invoke.
+    Return a compiled graph ready to invoke.
     """
     workflow = StateGraph(Dict[str, Any])
 
@@ -90,13 +90,6 @@ def run_pipeline() -> Dict[str, Any]:
         "keywords": args.keywords,
         "top_n_per_platform": args.top_n_per_platform,
     }
-
-    serp = os.getenv("SERPAPI_KEY")
-    yt = os.getenv("YOUTUBE_API_KEY")
-    if serp:
-        initial_state["SERPAPI_KEY"] = serp
-    if yt:
-        initial_state["YOUTUBE_API_KEY"] = yt
 
     final_state = graph.invoke(initial_state)
     return final_state

@@ -34,7 +34,7 @@ def _is_spam(text: str) -> bool:
     return False
 
 
-@traceable(run_type="tool", name="noise_filtering")
+@traceable(run_type="chain", name="noise_filtering")
 def noise_filtering_node(state: Dict[str, Any]) -> Dict[str, Any]:
     """
     Node 3: Deduplicate, filter irrelevant, drop spam.

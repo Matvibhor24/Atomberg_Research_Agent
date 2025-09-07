@@ -1,14 +1,17 @@
 from typing import List, Dict, Any
 from googleapiclient.discovery import build
+import os
 
 
-def fetch_youtube(
-    keyword: str, api_key: str, top_n_videos: int = 20
-) -> List[Dict[str, Any]]:
+def fetch_youtube(keyword: str, top_n_videos: int = 20) -> List[Dict[str, Any]]:
     """
     Fetch top N YouTube videos + stats for a given keyword.
     Requires YouTube Data API v3 key.
     """
+    api_key = os.getenv("YOUTUBE_API_KEY")
+    if not api_key:
+        raise RuntimeError("Missing YOUTUBE_API_KEY in environment")
+
     youtube = build("youtube", "v3", developerKey=api_key)
 
     search_response = (

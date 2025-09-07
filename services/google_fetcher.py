@@ -1,11 +1,13 @@
 import requests
 from typing import List, Dict, Any
+import os
 
 
-def fetch_google_serpapi(
-    keyword: str, serpapi_key: str, top_n: int = 20
-) -> List[Dict[str, Any]]:
+def fetch_google_serpapi(keyword: str, top_n: int = 20) -> List[Dict[str, Any]]:
     url = "https://serpapi.com/search"
+    serpapi_key = os.getenv("SERPAPI_KEY")
+    if not serpapi_key:
+        raise RuntimeError("Missing SERPAPI_KEY in environment")
     params = {"engine": "google", "q": keyword, "api_key": serpapi_key}
     r = requests.get(url, params=params, timeout=30)
     r.raise_for_status()

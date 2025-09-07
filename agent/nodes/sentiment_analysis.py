@@ -21,7 +21,7 @@ def _get_sentiment(text: str) -> str:
         return "neutral"
 
 
-@traceable(run_type="tool", name="sentiment_analysis")
+@traceable(run_type="chain", name="sentiment_analysis")
 def sentiment_analysis_node(state: Dict[str, Any]) -> Dict[str, Any]:
     """
     Node 6: Run sentiment analysis and tally results per brand.

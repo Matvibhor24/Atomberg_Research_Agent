@@ -4,7 +4,7 @@ from langsmith import traceable
 BRANDS = ["Atomberg", "Crompton", "Havells", "Orient", "Bajaj", "Polycab", "Usha"]
 
 
-@traceable(run_type="tool", name="metric_computation")
+@traceable(run_type="chain", name="metric_computation")
 def metric_computation_node(state: Dict[str, Any]) -> Dict[str, Any]:
     """
     Node 7: Compute SoV, SPV, Engagement Share for each brand.

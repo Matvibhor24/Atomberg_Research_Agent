@@ -16,7 +16,7 @@ def _tag_brands(text: str, brands: List[str]) -> List[str]:
     return matches
 
 
-@traceable(run_type="tool", name="brand_tagging")
+@traceable(run_type="chain", name="brand_tagging")
 def brand_tagging_node(state: Dict[str, Any]) -> Dict[str, Any]:
     """
     Node 4: Scan posts and tag them with mentioned brands.
