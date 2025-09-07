@@ -1,9 +1,11 @@
 from typing import Dict, Any, DefaultDict
 from collections import defaultdict
+from langsmith import traceable
 
 BRANDS = ["Atomberg", "Crompton", "Havells", "Orient", "Bajaj", "Polycab", "Usha"]
 
 
+@traceable(run_type="tool", name="engagement_aggregation")
 def engagement_aggregation_node(state: Dict[str, Any]) -> Dict[str, Any]:
     """
     Node 5: Aggregate engagement metrics for each brand.

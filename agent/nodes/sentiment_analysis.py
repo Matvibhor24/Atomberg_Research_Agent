@@ -1,5 +1,6 @@
 from typing import Dict, Any
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from langsmith import traceable
 
 BRANDS = ["Atomberg", "Crompton", "Havells", "Orient", "Bajaj", "Polycab", "Usha"]
 
@@ -20,6 +21,7 @@ def _get_sentiment(text: str) -> str:
         return "neutral"
 
 
+@traceable(run_type="tool", name="sentiment_analysis")
 def sentiment_analysis_node(state: Dict[str, Any]) -> Dict[str, Any]:
     """
     Node 6: Run sentiment analysis and tally results per brand.

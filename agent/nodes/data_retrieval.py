@@ -5,8 +5,10 @@ from typing import Dict, Any
 from services.google_fetcher import fetch_google_serpapi
 from services.youtube_fetcher import fetch_youtube
 from services.x_fetcher import fetch_x_snscrape
+from langsmith import traceable
 
 
+@traceable(run_type="tool", name="data_retrieval")
 def data_retrieval_node(state: Dict[str, Any]) -> Dict[str, Any]:
     """LangGraph node: fetches data from Google, YouTube, X"""
     keyword = state.get("keywords", ["smart fan"])[0]

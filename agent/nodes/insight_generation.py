@@ -1,6 +1,7 @@
 from typing import Dict, Any
 import statistics
 import os
+from langsmith import traceable
 
 BRANDS = ["Atomberg", "Crompton", "Havells", "Orient", "Bajaj", "Polycab", "Usha"]
 
@@ -34,6 +35,7 @@ def _rule_based_insights(metrics: Dict[str, Any]) -> Dict[str, str]:
     return insights
 
 
+@traceable(run_type="tool", name="insight_generation")
 def insight_generation_node(state: Dict[str, Any]) -> Dict[str, Any]:
     metrics = state.get("metrics", {})
     rule_based = _rule_based_insights(metrics)

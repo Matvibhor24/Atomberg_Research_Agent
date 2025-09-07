@@ -4,6 +4,7 @@ import argparse
 
 from langgraph.graph import StateGraph, END
 from dotenv import load_dotenv
+from langsmith import traceable
 
 from agent.nodes.keyword_setup import keyword_setup_node
 from agent.nodes.data_retrieval import data_retrieval_node
@@ -79,9 +80,8 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-if __name__ == "__main__":
-    load_dotenv()
-
+@traceable(run_type="chain", name="atomberg_research_pipeline")
+def run_pipeline() -> Dict[str, Any]:
     args = parse_args()
 
     graph = build_graph()
@@ -99,6 +99,12 @@ if __name__ == "__main__":
         initial_state["YOUTUBE_API_KEY"] = yt
 
     final_state = graph.invoke(initial_state)
+    return final_state
+
+
+if __name__ == "__main__":
+    load_dotenv()
+    final_state = run_pipeline()
 
     print("Metrics:")
     print(final_state.get("metrics", {}))
