@@ -1,9 +1,9 @@
 # Atomberg Share of Voice AI Agent
 
 ## Overview
-This project implements an AI agent that analyzes Atomberg’s online presence for "smart fans" across **Google**, **YouTube**, and **X (Twitter)**. The agent quantifies **Share of Voice (SoV)**, **Share of Positive Voice (SPV)**, engagement metrics, and generates actionable marketing insights.
+This project implements an AI agent that analyzes Atomberg’s online presence for "smart fans" across **Google** and **YouTube**. The agent quantifies **Share of Voice (SoV)**, **Share of Positive Voice (SPV)**, engagement metrics, and generates actionable marketing insights.
 
-Built with **Python**, **LangGraph nodes**, **VADER sentiment analysis**, and optional **LLM integration** for narrative insights.
+Built with **Python**, **LangGraph nodes**, **VADER sentiment analysis**, and **LLM integration** for narrative insights.
 
 ---
 
@@ -22,7 +22,6 @@ Built with **Python**, **LangGraph nodes**, **VADER sentiment analysis**, and op
 - **Python** – Data processing, cleaning, and workflow orchestration  
 - **Google Search API / SerpAPI** – Fetch search results  
 - **YouTube Data API v3** – Fetch YouTube posts  
-- **snscrape** – Fetch X (Twitter) posts  
 - **VADER (NLTK)** – Sentiment analysis  
 - **LangGraph** – AI agent orchestration  
 - **Matplotlib / Seaborn** – Visualization (optional)  
