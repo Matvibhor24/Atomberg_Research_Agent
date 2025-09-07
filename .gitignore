@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+*.egg
+
+# Environments
+.env
+.venv/
+venv/
+env/
+atomberg_venv/
+.python-version
+
+# Build / Dist
+build/
+dist/
+site/
+wheelhouse/
+pip-wheel-metadata/
+
+# Caches & Logs
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.cache/
+*.log
+
+# Coverage
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# IDE / Editor
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Misc
+*.sqlite3
+*.db
+*.sqlite
+
