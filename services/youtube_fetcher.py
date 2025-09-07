@@ -1,8 +1,10 @@
 from typing import List, Dict, Any
 from googleapiclient.discovery import build
 import os
+from langsmith import traceable
 
 
+@traceable(run_type="tool", name="fetch_youtube")
 def fetch_youtube(keyword: str, top_n_videos: int = 20) -> List[Dict[str, Any]]:
     """
     Fetch top N YouTube videos + stats for a given keyword.

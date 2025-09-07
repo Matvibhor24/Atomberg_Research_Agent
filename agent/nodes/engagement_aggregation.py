@@ -1,8 +1,7 @@
 from typing import Dict, Any, DefaultDict
 from collections import defaultdict
 from langsmith import traceable
-
-BRANDS = ["Atomberg", "Crompton", "Havells", "Orient", "Bajaj", "Polycab", "Usha"]
+from config import get_brands
 
 
 @traceable(run_type="chain", name="engagement_aggregation")
@@ -13,7 +12,7 @@ def engagement_aggregation_node(state: Dict[str, Any]) -> Dict[str, Any]:
     tagged_posts = state.get("tagged_data", [])
 
     engagement_totals = {
-        brand: {"likes": 0, "comments": 0, "views": 0, "shares": 0} for brand in BRANDS
+        brand: {"likes": 0, "comments": 0, "views": 0, "shares": 0} for brand in get_brands()
     }
 
     for post in tagged_posts:

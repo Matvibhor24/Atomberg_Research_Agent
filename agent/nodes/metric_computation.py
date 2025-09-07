@@ -1,7 +1,6 @@
 from typing import Dict, Any
 from langsmith import traceable
-
-BRANDS = ["Atomberg", "Crompton", "Havells", "Orient", "Bajaj", "Polycab", "Usha"]
+from config import get_brands
 
 
 @traceable(run_type="chain", name="metric_computation")
@@ -16,10 +15,11 @@ def metric_computation_node(state: Dict[str, Any]) -> Dict[str, Any]:
     results = {}
 
     total_mentions = sum(mention_counters.values())
-    total_positive = sum(sentiment_totals[b]["positive"] for b in BRANDS)
-    total_engagement = sum(sum(engagement_totals[b].values()) for b in BRANDS)
+    brands = get_brands()
+    total_positive = sum(sentiment_totals[b]["positive"] for b in brands)
+    total_engagement = sum(sum(engagement_totals[b].values()) for b in brands)
 
-    for brand in BRANDS:
+    for brand in brands:
         mentions = mention_counters.get(brand, 0)
         sentiments = sentiment_totals.get(
             brand, {"positive": 0, "negative": 0, "neutral": 0}

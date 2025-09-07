@@ -1,20 +1,27 @@
 from typing import Dict, Any
-import statistics
 import os
+from dotenv import load_dotenv
 from langsmith import traceable
-from langchain_google_genai import ChatGoogleGenerativeAI
+from config import get_brands
+from openai import OpenAI
 
-BRANDS = ["Atomberg", "Crompton", "Havells", "Orient", "Bajaj", "Polycab", "Usha"]
+load_dotenv()
 
-
-def _rule_based_insights(metrics: Dict[str, Any]) -> Dict[str, str]:
+@traceable(run_type="tool", name="rule_based_insights")
+def _rule_based_insights(metrics: Dict[str, Any], keywords: list = None) -> Dict[str, str]:
+    """Generate basic rule-based insights from metrics"""
     insights = {}
+    
+    if keywords and len(keywords) > 0:
+        product_term = keywords[0]
+    else:
+        product_term = "products"
 
     top_brand = max(metrics.items(), key=lambda x: x[1]["sov_percent"])[0]
     top_sov = metrics[top_brand]["sov_percent"]
 
     insights["sov"] = (
-        f"{top_brand} leads with {top_sov:.1f}% Share of Voice among smart fans."
+        f"{top_brand} leads with {top_sov:.1f}% Share of Voice among {product_term}."
     )
 
     top_spv_brand = max(metrics.items(), key=lambda x: x[1]["spv_percent"])[0]
@@ -36,86 +43,107 @@ def _rule_based_insights(metrics: Dict[str, Any]) -> Dict[str, str]:
     return insights
 
 
-def _call_gemini(summary_prompt: str, api_key: str) -> str:
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
-        temperature=0.4,
-        max_output_tokens=250,
-        google_api_key=api_key,
+@traceable(run_type="llm", name="call_openai")
+def _call_openai(prompt: str, api_key: str) -> str:
+    """Call OpenAI GPT-4o-mini"""
+    
+    client = OpenAI(api_key=api_key)
+    completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "You are a marketing analyst. Generate concise, actionable insights."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.4
     )
-    return (llm.invoke(summary_prompt).content or "").strip()
+    return completion.choices[0].message.content.strip()
+
+
+@traceable(run_type="llm", name="call_gemini")
+def _call_gemini(prompt: str, api_key: str) -> str:
+    """Call OpenAI Gemini-2.5-flash"""
+    
+    client = OpenAI(
+        api_key=api_key,
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+    )
+    completion = client.chat.completions.create(
+        model="gemini-2.5-flash",
+        messages=[
+            {"role": "system", "content": "You are a marketing analyst. Generate concise, actionable insights."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.4
+    )
+    return completion.choices[0].message.content.strip()
+
+
+@traceable(run_type="chain", name="generate_llm_insights")
+def _generate_llm_insights(metrics: Dict[str, Any], rule_based: Dict[str, str]) -> str:
+    """Generate insights using either OpenAI or Gemini based on available API keys"""
+    
+    prompt = (
+        "You are a marketing analyst. Summarize these brand metrics into a concise, insightful paragraph "
+        "with one key takeaway and one recommendation. Avoid repeating numbers verbatim; focus on narrative.\n\n"
+        f"Metrics JSON:\n{metrics}\n\n"
+        f"Rule-based insights:\n{rule_based}\n\n"
+    )
+
+    openai_key = os.getenv("OPENAI_API_KEY")
+    gemini_key = os.getenv("GOOGLE_API_KEY")
+    
+    if gemini_key:
+        try:
+            print("Using Gemini 2.5 Flash for insights")
+            return _call_gemini(prompt, gemini_key)
+        except Exception as e:
+            print(f"Gemini failed: {e}")
+
+    elif openai_key:
+        try:
+            print("Using OpenAI GPT-4o-mini for insights")
+            return _call_openai(prompt, openai_key)
+        except Exception as e:
+            print(f"OpenAI failed: {e}")
+    
+    
+    
+    print("No LLM available, using rule-based insights")
+    return None
 
 
 @traceable(run_type="chain", name="insight_generation")
 def insight_generation_node(state: Dict[str, Any]) -> Dict[str, Any]:
+    """Generate marketing insights from brand metrics"""
     metrics = state.get("metrics", {})
+    keywords = state.get("keywords", [])
+    
     try:
         if not metrics:
             raise ValueError("No metrics available")
-        rule_based = _rule_based_insights(metrics)
-        narrative = (
+        
+        rule_based = _rule_based_insights(metrics, keywords)
+        fallback_narrative = (
             f"Based on the data, {rule_based['sov']} "
             f"Additionally, {rule_based['spv']} "
             f"Finally, {rule_based['engagement']}"
         )
-    except Exception:
+        
+    except Exception as e:
+        print(f"Error generating rule-based insights: {e}")
         rule_based = {}
-        narrative = (
+        fallback_narrative = (
             "Not enough data to compute comparative brand insights yet. "
             "Please try with broader keywords or a longer time window."
         )
-
-    # Prefer Google Gemini (via GOOGLE_API_KEY) for generating narrative
-    gemini_key = os.getenv("GOOGLE_API_KEY") or state.get("GOOGLE_API_KEY")
-    if gemini_key:
-        try:
-            summary_prompt = (
-                "You are a marketing analyst. Summarize these brand metrics into a concise, insightful paragraph "
-                "with one key takeaway and one recommendation. Avoid repeating numbers verbatim; focus on narrative.\n\n"
-                f"Metrics JSON:\n{metrics}\n\n"
-                f"Rule-based insights:\n{rule_based}\n\n"
-            )
-            llm_text = _call_gemini(summary_prompt, gemini_key)
-        except Exception:
-            llm_text = narrative
-    else:
-        llm_text = narrative
-
-    if not llm_text:
-        llm_text = narrative
-
-    # OpenAI-based summarization is temporarily disabled in favor of Gemini.
-    # If needed later, re-enable this block and ensure OPENAI_API_KEY is set.
-    # api_key = os.getenv("OPENAI_API_KEY") or state.get("OPENAI_API_KEY")
-    # if api_key:
-    #     try:
-    #         from openai import OpenAI
-    #
-    #         client = OpenAI(api_key=api_key)
-    #         summary_prompt = (
-    #             "You are a marketing analyst. Summarize these brand metrics into a concise, insightful paragraph "
-    #             "with one key takeaway and one recommendation. Avoid repeating numbers verbatim; focus on narrative.\n\n"
-    #             f"Metrics JSON:\n{metrics}\n\n"
-    #             f"Rule-based insights:\n{rule_based}\n\n"
-    #         )
-    #         completion = client.chat.completions.create(
-    #             model="gpt-4o-mini",
-    #             messages=[
-    #                 {
-    #                     "role": "system",
-    #                     "content": "You generate crisp marketing insights.",
-    #                 },
-    #                 {"role": "user", "content": summary_prompt},
-    #             ],
-    #             temperature=0.4,
-    #             max_tokens=250,
-    #         )
-    #         llm_text = completion.choices[0].message.content.strip()
-    #     except Exception:
-    #         llm_text = narrative
-
+    
+    llm_narrative = _generate_llm_insights(metrics, rule_based)
+    
+    final_narrative = llm_narrative if llm_narrative else fallback_narrative
+    
     state["insights"] = {
         "rule_based": rule_based,
-        "narrative": llm_text,
+        "narrative": final_narrative,
     }
+    
     return state

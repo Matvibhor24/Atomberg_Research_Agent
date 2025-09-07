@@ -1,12 +1,12 @@
 from typing import Dict, Any
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from langsmith import traceable
-
-BRANDS = ["Atomberg", "Crompton", "Havells", "Orient", "Bajaj", "Polycab", "Usha"]
+from config import get_brands
 
 analyzer = SentimentIntensityAnalyzer()
 
 
+@traceable(run_type="tool", name="get_sentiment")
 def _get_sentiment(text: str) -> str:
     """
     Use VADER to classify sentiment.
@@ -29,7 +29,7 @@ def sentiment_analysis_node(state: Dict[str, Any]) -> Dict[str, Any]:
     posts = state.get("tagged_data", [])
 
     sentiment_totals = {
-        brand: {"positive": 0, "negative": 0, "neutral": 0} for brand in BRANDS
+        brand: {"positive": 0, "negative": 0, "neutral": 0} for brand in get_brands()
     }
 
     for post in posts:

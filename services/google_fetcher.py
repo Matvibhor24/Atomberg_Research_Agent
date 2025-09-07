@@ -1,8 +1,10 @@
 import requests
 from typing import List, Dict, Any
 import os
+from langsmith import traceable
 
 
+@traceable(run_type="tool", name="fetch_google_serpapi")
 def fetch_google_serpapi(keyword: str, top_n: int = 20) -> List[Dict[str, Any]]:
     url = "https://serpapi.com/search"
     serpapi_key = os.getenv("SERPAPI_KEY")

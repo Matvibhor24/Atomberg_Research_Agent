@@ -1,9 +1,9 @@
 from typing import Dict, Any, List
 from langsmith import traceable
+from config import get_brands
 
-BRANDS = ["Atomberg", "Crompton", "Havells", "Orient", "Bajaj", "Polycab", "Usha"]
 
-
+@traceable(run_type="tool", name="tag_brands")
 def _tag_brands(text: str, brands: List[str]) -> List[str]:
     """
     Check which brands are mentioned in text (case-insensitive).
@@ -24,10 +24,11 @@ def brand_tagging_node(state: Dict[str, Any]) -> Dict[str, Any]:
     posts = state.get("clean_data", [])
     tagged_posts = []
 
-    mention_counters = {brand: 0 for brand in BRANDS}
+    brands = get_brands()
+    mention_counters = {brand: 0 for brand in brands}
 
     for post in posts:
-        mentions = _tag_brands(post["text"], BRANDS)
+        mentions = _tag_brands(post["text"], brands)
         if mentions:
             post["brands"] = mentions
             for b in mentions:

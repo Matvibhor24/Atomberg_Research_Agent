@@ -3,6 +3,7 @@ import re
 from langsmith import traceable
 
 
+@traceable(run_type="tool", name="deduplicate")
 def _deduplicate(posts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     seen = set()
     unique = []
@@ -14,6 +15,7 @@ def _deduplicate(posts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return unique
 
 
+@traceable(run_type="tool", name="is_relevant")
 def _is_relevant(text: str, keywords: List[str]) -> bool:
     """
     Check if text contains at least one keyword (with word boundary).
@@ -26,6 +28,7 @@ def _is_relevant(text: str, keywords: List[str]) -> bool:
     return False
 
 
+@traceable(run_type="tool", name="is_spam")
 def _is_spam(text: str) -> bool:
     if len(text.split()) <= 3:
         return True

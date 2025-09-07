@@ -6,12 +6,13 @@ from services.google_fetcher import fetch_google_serpapi
 from services.youtube_fetcher import fetch_youtube
 from services.x_fetcher import fetch_x_snscrape
 from langsmith import traceable
+from config import get_keywords
 
 
 @traceable(run_type="tool", name="data_retrieval")
 def data_retrieval_node(state: Dict[str, Any]) -> Dict[str, Any]:
     """LangGraph node: fetches data from Google, YouTube, X"""
-    keyword = state.get("keywords", ["smart fan"])[0]
+    keyword = state.get("keywords", get_keywords())[0]
     top_n = state.get("top_n_per_platform", 20)
 
     combined = []

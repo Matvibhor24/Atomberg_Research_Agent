@@ -1,5 +1,6 @@
 from typing import Dict, Any
 from langsmith import traceable
+from config import get_brands
 
 
 @traceable(run_type="chain", name="keyword_setup")
@@ -7,7 +8,7 @@ def keyword_setup_node(state: Dict[str, Any]) -> Dict[str, Any]:
     """
     Node 1: Initialize brands, mentions, engagement, and sentiment counters.
     """
-    brands = ["Atomberg", "Crompton", "Havells", "Orient", "Bajaj", "Polycab", "Usha"]
+    brands = get_brands()
 
     state["brands"] = brands
     state["mentions"] = {b: 0 for b in brands}

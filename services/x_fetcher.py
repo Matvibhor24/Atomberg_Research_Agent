@@ -1,8 +1,10 @@
 import snscrape.modules.twitter as sntwitter
 from typing import List, Dict, Any
 from datetime import datetime
+from langsmith import traceable
 
 
+@traceable(run_type="tool", name="fetch_x_snscrape")
 def fetch_x_snscrape(
     keyword: str, top_n: int = 100, since_iso: str = None, until_iso: str = None
 ) -> List[Dict[str, Any]]:

@@ -1,5 +1,6 @@
 from langgraph.graph import StateGraph, END
 from typing import TypedDict, List, Dict, Any
+from config import get_brands
 
 
 class AgentState(TypedDict):
@@ -15,7 +16,7 @@ class AgentState(TypedDict):
 
 
 def keyword_setup(state: AgentState) -> AgentState:
-    brands = ["Atomberg", "Crompton", "Havells", "Orient", "Bajaj", "Polycab", "Usha"]
+    brands = get_brands()
     return {
         **state,
         "brands": brands,
