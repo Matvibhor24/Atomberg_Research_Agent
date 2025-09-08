@@ -61,14 +61,14 @@ def _call_openai(prompt: str, api_key: str) -> str:
 
 @traceable(run_type="llm", name="call_gemini")
 def _call_gemini(prompt: str, api_key: str) -> str:
-    """Call OpenAI Gemini-2.5-flash"""
+    """Call OpenAI Gemini-1.5-flash"""
     
     client = OpenAI(
         api_key=api_key,
         base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
     )
     completion = client.chat.completions.create(
-        model="gemini-2.5-flash",
+        model="gemini-1.5-flash",
         messages=[
             {"role": "system", "content": "You are a marketing analyst. Generate concise, actionable insights."},
             {"role": "user", "content": prompt}

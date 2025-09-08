@@ -57,7 +57,7 @@ def llm_classify(posts: List[str], keywords: List[str]) -> List[Dict[str, Any]]:
     )
 
     completion = client.chat.completions.create(
-        model="gemini-2.5-flash",
+        model="gemini-1.5-flash",
         messages=[
             {"role": "system", "content": "You are a strict JSON classifier. Reply only with JSON."},
             {"role": "user", "content": prompt}
