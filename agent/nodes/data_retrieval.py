@@ -4,7 +4,6 @@ from typing import Dict, Any
 
 from services.google_fetcher import fetch_google_serpapi
 from services.youtube_fetcher import fetch_youtube
-from services.x_fetcher import fetch_x_snscrape
 from langsmith import traceable
 from config import get_keywords
 
