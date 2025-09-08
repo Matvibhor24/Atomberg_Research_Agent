@@ -14,7 +14,6 @@ export default function StepsFlow({ currentStep, errorStep = null }) {
   return (
     <ol
       className="list-group list-group-numbered"
-      style={{ maxHeight: "300px", overflowY: "auto" }}
     >
       {steps.map((step, idx) => {
         const stepNum = idx + 1;

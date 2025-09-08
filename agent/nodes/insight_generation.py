@@ -79,14 +79,16 @@ def _call_gemini(prompt: str, api_key: str) -> str:
 
 
 @traceable(run_type="chain", name="generate_llm_insights")
-def _generate_llm_insights(metrics: Dict[str, Any], rule_based: Dict[str, str]) -> str:
+def _generate_llm_insights(metrics: Dict[str, Any], rule_based: Dict[str, str], keywords: list = None) -> str:
     """Generate insights using either OpenAI or Gemini based on available API keys"""
     
     prompt = (
-        "You are a marketing analyst. Summarize these brand metrics into a concise, insightful paragraph "
-        "with one key takeaway and one recommendation. Avoid repeating numbers verbatim; focus on narrative.\n\n"
+        f"You are a marketing analyst for 'Atomberg' brand. For these keywords {keywords} searched on the internet, we have got the following - \n\n"
         f"Metrics JSON:\n{metrics}\n\n"
         f"Rule-based insights:\n{rule_based}\n\n"
+        "Summarize these brand metrics into a concise, insightful paragraph "
+        "with one key takeaway and one recommendation. Avoid repeating numbers verbatim; focus on narrative.\n\n"
+        
     )
 
     openai_key = os.getenv("OPENAI_API_KEY")
@@ -137,7 +139,7 @@ def insight_generation_node(state: Dict[str, Any]) -> Dict[str, Any]:
             "Please try with broader keywords or a longer time window."
         )
     
-    llm_narrative = _generate_llm_insights(metrics, rule_based)
+    llm_narrative = _generate_llm_insights(metrics, rule_based, keywords)
     
     final_narrative = llm_narrative if llm_narrative else fallback_narrative
     

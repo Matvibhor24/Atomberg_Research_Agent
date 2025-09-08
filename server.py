@@ -50,6 +50,7 @@ async def run_agent(req: AgentRequest):
 
 @app.post("/run-agent-stream")
 async def run_agent_stream(req: AgentRequest):
+    print(f"Received request at /run-agent-stream [POST]: {req.json()}")
     async def generate_progress():
         try:
             initial_state = {

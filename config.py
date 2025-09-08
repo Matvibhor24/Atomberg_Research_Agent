@@ -9,7 +9,12 @@ DEFAULT_BRANDS = [
     "Havells", 
     "Orient", 
     "Bajaj", 
+    "SuperFan",
+    "Hunter",
     "Polycab", 
+    "Midea",
+    "Kichler",
+    "V-Guard",
     "Usha"
 ]
 
