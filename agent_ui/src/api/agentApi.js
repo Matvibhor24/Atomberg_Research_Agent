@@ -1,5 +1,5 @@
 export async function runAgent({ keywords, n }) {
-  const res = await fetch("http://localhost:8000/run-agent", {
+  const res = await fetch("https://atomberg-shareofvoice-ai-agent.onrender.com/run-agent", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ keywords, n }),
@@ -19,7 +19,7 @@ export function runAgentWithProgress(
   onError
 ) {
   const eventSource = new EventSource(
-    `http://localhost:8000/run-agent-stream`,
+    `https://atomberg-shareofvoice-ai-agent.onrender.com/run-agent-stream`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -28,7 +28,7 @@ export function runAgentWithProgress(
   );
 
   // Note: EventSource doesn't support POST with body, so we need to use fetch with streaming
-  return fetch("http://localhost:8000/run-agent-stream", {
+  return fetch("https://atomberg-shareofvoice-ai-agent.onrender.com/run-agent-stream", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ keywords, n }),
