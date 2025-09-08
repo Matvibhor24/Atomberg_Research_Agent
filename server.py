@@ -17,7 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(title=API_TITLE)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "https://atomberg-share-of-voice-ai-agent.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
